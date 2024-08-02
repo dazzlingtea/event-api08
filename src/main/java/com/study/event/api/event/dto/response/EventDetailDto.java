@@ -18,6 +18,7 @@ public class EventDetailDto {
     private String title;
     @JsonFormat(pattern = "yyyy년 MM월 dd일")
     private LocalDate startDate;
+
     @JsonProperty(value = "img-url")
     private String imgUrl;
 
@@ -27,5 +28,4 @@ public class EventDetailDto {
         this.startDate = event.getDate();
         this.imgUrl = event.getImage();
     }
-
 }

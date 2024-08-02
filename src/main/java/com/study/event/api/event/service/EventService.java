@@ -1,10 +1,14 @@
 package com.study.event.api.event.service;
 
+
 import com.study.event.api.event.dto.request.EventSaveDto;
 import com.study.event.api.event.dto.response.EventDetailDto;
 import com.study.event.api.event.dto.response.EventOneDto;
 import com.study.event.api.event.entity.Event;
+import com.study.event.api.event.entity.EventUser;
+import com.study.event.api.event.entity.Role;
 import com.study.event.api.event.repository.EventRepository;
+import com.study.event.api.event.repository.EventUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -25,13 +29,14 @@ import java.util.stream.Collectors;
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final EventUserRepository eventUserRepository;
 
     // 전체 조회 서비스
-    public Map<String, Object> getEvents(int pageNo, String sort) {
+    public Map<String, Object> getEvents(int pageNo, String sort, String userId) {
 
         Pageable pageable = PageRequest.of(pageNo - 1, 4);
 
-        Page<Event> eventsPage = eventRepository.findEvents(pageable, sort);
+        Page<Event> eventsPage = eventRepository.findEvents(pageable, sort, userId);
 
         // 이벤트 목록
         List<Event> events = eventsPage.getContent();
@@ -51,30 +56,46 @@ public class EventService {
     }
 
     // 이벤트 등록
-    public void saveEvent(EventSaveDto dto) {
-        Event savedEvent = eventRepository.save(dto.toEntity());
+    public void saveEvent(EventSaveDto dto, String userId) {
+
+        // 회원 정보 조회 (JPA는 EventUser객체 자체를 세팅해야 함)
+        EventUser eventUser = eventUserRepository.findById(userId).orElseThrow();
+
+        // 로그인한 회원 권한 조회 확인 + 등록 개수 확인
+        // 권한에 따른 글쓰기 제한
+        if(
+            eventUser.getRole() == Role.COMMON
+            && eventUser.getEventList().size() >= 4 // 양방향
+        ) {
+            throw new IllegalStateException("일반 회원은 이벤트를 더 이상 등록할 수 없습니다.");
+        }
+
+        Event newEvent = dto.toEntity();
+        newEvent.setEventUser(eventUser);
+
+        Event savedEvent = eventRepository.save(newEvent);
         log.info("saved event: {}", savedEvent);
-//        return getEvents("date");
     }
 
     // 이벤트 단일 조회
-    public EventOneDto getEventDetail(Long eventId) {
+    public EventOneDto getEventDetail(Long id) {
 
-        Event foundEvent = eventRepository.findById(eventId).orElseThrow();
+        Event foundEvent = eventRepository.findById(id).orElseThrow();
 
         return new EventOneDto(foundEvent);
     }
 
     // 이벤트 삭제
-    public void deleteEvent(Long eventId) {
-        eventRepository.deleteById(eventId);
-    }
-    // 이벤트 수정
-    public void modifyEvent(Long eventId, EventSaveDto dto) {
-        Event foundEvent = eventRepository.findById(eventId).orElseThrow();
-        foundEvent.changeEvent(dto);
-        eventRepository.save(foundEvent);
+    public void deleteEvent(Long id) {
+        eventRepository.deleteById(id);
     }
 
+    // 이벤트 수정
+    public void modifyEvent(EventSaveDto dto, Long id) {
+        Event foundEvent = eventRepository.findById(id).orElseThrow();
+        foundEvent.changeEvent(dto);
+
+        eventRepository.save(foundEvent);
+    }
 
 }

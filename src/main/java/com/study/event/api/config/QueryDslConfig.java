@@ -11,13 +11,14 @@ import javax.persistence.PersistenceContext;
 @Configuration
 public class QueryDslConfig {
 
-    @PersistenceContext // 영속성을 제어하는 컨텍스트로 인식
+    @PersistenceContext
     private EntityManager em;
 
-    // <bean id='jpaQueryFactory' class='com.querydsl.jpa.impl.JPAQueryFactory'
-    // class 는 리턴타입을 작성
-    @Bean // 외부라이브러리를 스프링컨테이너에 관리시키는 설정
-public JPAQueryFactory jpaQueryFactory() {
-        return new JPAQueryFactory(em); // 스프링이 대신 관리해준다
+
+    // "<bean id='jpaQueryFactory' class='com.querydsl.jpa.impl.JPAQueryFactory' />"
+
+    @Bean // 외부라이브러리를 스프링 컨테이너에 관리시키는 설정
+    public JPAQueryFactory jpaQueryFactory() {
+        return new JPAQueryFactory(em);
     }
 }

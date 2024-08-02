@@ -6,8 +6,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 
-@Getter @Setter
-@ToString
+@Getter @Setter @ToString
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,18 +16,18 @@ public class EventSaveDto {
     private String title;
     private String desc;
     private String imageUrl;
+
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate beginDate;
 
     // 엔터티로 변경하는 유틸 메서드
     public Event toEntity() {
+
         return Event.builder()
                 .title(this.title)
                 .description(this.desc)
                 .image(this.imageUrl)
                 .date(this.beginDate)
-//                .date(LocalDateTime.from(this.beginDate))
-//                .date(LocalDateTime.parse(this.beginDate))
                 .build();
     }
 }

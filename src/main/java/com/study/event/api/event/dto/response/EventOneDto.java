@@ -7,20 +7,18 @@ import lombok.*;
 
 import java.time.LocalDate;
 
-@Getter
-@ToString
+@Getter @ToString
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
-
 public class EventOneDto {
 
     @JsonProperty("event-id")
     private String id;
 
     private String title;
+
     private String desc;
 
     @JsonProperty("img-url")
@@ -36,8 +34,5 @@ public class EventOneDto {
         this.desc = e.getDescription();
         this.image = e.getImage();
         this.date = e.getDate();
-
     }
-
-
 }
